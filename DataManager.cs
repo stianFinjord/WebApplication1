@@ -19,10 +19,13 @@ namespace WebApplication1
 
         }
 
-        public static void GetAllUsers()
-        {
-
-        }
+        //async public static void GetAllUsers()
+        //{
+        //    var sql = "SELECT * FROM TextObject";
+        //    var conn = new SqlConnection(connectionString);
+        //    var stian = await conn.QueryAsync<string>(sql);
+        //    return stian[0];
+        //}
 
         public static void GetUser(int userId)
         {
