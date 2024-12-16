@@ -32,48 +32,50 @@ app.UseHttpsRedirection();
 //    Car car1 = new Car("Mercedes", 5);
 //    return car1;
 //});
-const string connStr = "Server=(localdb)\\local;Database=GETDb;Trusted_Connection=True;";
+const string connStr = "Server=tcp:getturi.database.windows.net,1433;Initial Catalog=TuriDB;Persist Security Info=False;User ID=getturi;Password=GetAcademy2024;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;";
 
 app.MapGet("/GetCar", DataManager.GetCar);
 app.MapGet("/GetUser", (int id) => DataManager.GetUser(id));
 
 app.MapGet("/GetAllUsers", async () =>
 {
-    var sql = "SELECT * FROM userProfile";
+    const string sql = "SELECT * FROM userProfile";
     var conn = new SqlConnection(connStr);
     var userObjects = await conn.QueryAsync(sql);
+    
     return Results.Json(userObjects);
 });
 
 app.MapGet("/GetUser/{id}", async (int id) =>
-{
-    var sql = "SELECT * FROM userProfile WHERE Id = @Id";
+{   
+    const string sql = "SELECT * FROM userProfile WHERE Id = @Id";
     var conn = new SqlConnection(connStr);
     var userObject = await conn.QueryAsync(sql, new { Id = id });
     return Results.Json(userObject);
 });
 
 
-app.MapPost("/SendFriendRequest", async ([FromBody] FriendRequest friendRequest) =>
+app.MapPost("/AcceptFriendRequest", async ([FromBody] FriendRequest friendRequest) =>
 {
-    var createFriendship = @"
+    const string createFriendship = @"
         INSERT INTO Friends (UserID, FriendID)  
         VALUES(@FromProfileId, @ToProfileId);
         INSERT INTO Friends (UserID, FriendID)
         VALUES(@ToProfileId, @FromProfileId);
         ";
 
-    using var conn = new SqlConnection(connStr);
+    var conn = new SqlConnection(connStr);
     await conn.ExecuteAsync(createFriendship, new
     {
         FromProfileId = friendRequest.fromProfileId,
         ToProfileId = friendRequest.toProfileId
     });
+    return Results.Json(new { Success = true });
 });
 
 
 //app.MapGet("/GetUser", DataManager.GetUser);
-app.UseCors(); // Enable CORS middleware
+app.UseCors(); // Enable CORS (Cross Origin Resource Sharing) Allows access from different url's 
 app.Run();
 
 
