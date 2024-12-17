@@ -87,25 +87,45 @@ app.MapPost("/RegisterUser", async ([FromBody] UserProfile userProfile) =>
     return Results.Json(new { Success = true });
 });
 
+//app.MapPost("/LoginUser", async ([FromBody] UserProfile userProfile) =>
+//{
+//    const string sql = ""; //Spørre om objekt finnes, og hvis det finnes, returner objektet, hvis ikke, returner false elns??
+//    var conn = new SqlConnection(connStr);
+//    await conn.ExecuteAsync(sql, new
+//    {
+//        Email = userProfile.Email,
+//        Password = userProfile.Password
+//    });
+//    return Results.Json(new { Success = true });
+//});
+
+// Returns user as json
 app.MapPost("/LoginUser", async ([FromBody] UserProfile userProfile) =>
 {
-    const string sql = ""; //Spørre om objekt finnes, og hvis det finnes, returner objektet, hvis ikke, returner false elns??
+    const string sql = @"
+        SELECT * FROM UserProfile 
+        WHERE Email = @Email AND Password = @Password";
+
     var conn = new SqlConnection(connStr);
-    await conn.ExecuteAsync(sql, new
+    var user = await conn.QueryFirstOrDefaultAsync(sql, new
     {
         Email = userProfile.Email,
         Password = userProfile.Password
     });
-    return Results.Json(new { Success = true });
+
+    if (user == null)
+    {
+        return Results.Unauthorized();
+    }
+
+    return Results.Json(user);
 });
-
-
 
 /*
 //API Endpoints we need:
 /SendFriendRequest {fromId, toId}
-/RegisterUser {userName, password, ?}
-/LoginUser {userName, password}
+/RegisterUser {userName, password, ?} //Done
+/LoginUser {userName, password} //Done
 
 */
 app.UseCors(); // Enable CORS (Cross Origin Resource Sharing) Allows access from different url's 
