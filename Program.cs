@@ -2,7 +2,7 @@ using Microsoft.Extensions.Configuration;
 using System.Xml;
 using Dapper;
 using Microsoft.Data.SqlClient;
-using WebApplication1;
+//using WebApplication1;
 using Microsoft.AspNetCore.Mvc;
 
 
@@ -32,10 +32,8 @@ app.UseHttpsRedirection();
 //    Car car1 = new Car("Mercedes", 5);
 //    return car1;
 //});
+//private static string connectionString = "Server=(localdb)\\local;Database=GETDb;Trusted_Connection=True;";
 const string connStr = "Server=tcp:getturi.database.windows.net,1433;Initial Catalog=TuriDB;Persist Security Info=False;User ID=getturi;Password=GetAcademy2024;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;";
-
-app.MapGet("/GetCar", DataManager.GetCar);
-app.MapGet("/GetUser", (int id) => DataManager.GetUser(id));
 
 app.MapGet("/GetAllUsers", async () =>
 {
@@ -73,8 +71,44 @@ app.MapPost("/AcceptFriendRequest", async ([FromBody] FriendRequest friendReques
     return Results.Json(new { Success = true });
 });
 
+app.MapPost("/RegisterUser", async ([FromBody] UserProfile userProfile) =>
+{
+    const string sql = @"
+        INSERT INTO UserProfile (userName, email, password)  
+        VALUES(@UserName, @Email, @Password);
+        ";
+    var conn = new SqlConnection(connStr);
+    await conn.ExecuteAsync(sql, new
+    {
+        UserName = userProfile.UserName,
+        Email = userProfile.Email,
+        Password = userProfile.Password
+    });
+    return Results.Json(new { Success = true });
+});
 
-//app.MapGet("/GetUser", DataManager.GetUser);
+app.MapPost("/LoginUser", async ([FromBody] UserProfile userProfile) =>
+{
+    const string sql = "";
+    var conn = new SqlConnection(connStr);
+    await conn.ExecuteAsync(sql, new
+    {
+        UserName = userProfile.UserName,
+        Email = userProfile.Email,
+        Password = userProfile.Password
+    });
+    return Results.Json(new { Success = true });
+});
+
+
+
+/*
+//API Endpoints we need:
+/SendFriendRequest {fromId, toId}
+/RegisterUser {userName, password, ?}
+/LoginUser {userName, password}
+
+*/
 app.UseCors(); // Enable CORS (Cross Origin Resource Sharing) Allows access from different url's 
 app.Run();
 
@@ -84,3 +118,10 @@ public class FriendRequest
     public int toProfileId { get; set; }
     public int fromProfileId { get; set; }
 };
+
+public class UserProfile
+{
+    public string Email { get; set; }
+    public string UserName { get; set; }
+    public string Password { get; set; }
+}
