@@ -89,11 +89,10 @@ app.MapPost("/RegisterUser", async ([FromBody] UserProfile userProfile) =>
 
 app.MapPost("/LoginUser", async ([FromBody] UserProfile userProfile) =>
 {
-    const string sql = "";
+    const string sql = ""; //Spørre om objekt finnes, og hvis det finnes, returner objektet, hvis ikke, returner false elns??
     var conn = new SqlConnection(connStr);
     await conn.ExecuteAsync(sql, new
     {
-        UserName = userProfile.UserName,
         Email = userProfile.Email,
         Password = userProfile.Password
     });
